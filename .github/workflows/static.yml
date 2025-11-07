@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steam Accounts Store</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0a0e27;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        /* Header Styles */
+        header {
+            background: linear-gradient(135deg, #1a2a52 0%, #0f1a35 100%);
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #00d4ff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo::before {
+            content: "🎮";
+            font-size: 32px;
+        }
+
+        .cart-btn {
+            background-color: #00d4ff;
+            color: #0a0e27;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .cart-btn:hover {
+            background-color: #00b8d4;
+            transform: scale(1.05);
+        }
+
+        .cart-count {
+            background-color: #ff4444;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* Main Container */
+        main {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+            color: #00d4ff;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: #a0a0a0;
+        }
+
+        /* Products Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .product-card {
+            background: linear-gradient(135deg, #1a2a52 0%, #0f1a35 100%);
+            border: 2px solid #00d4ff;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+            border-color: #00ffff;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #2a3a6a 0%, #1a2a4a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+        }
+
+        .product-content {
+            padding: 20px;
+        }
+
+        .product-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #00d4ff;
+        }
+
+        .product-level {
+            display: inline-block;
+            background-color: #ff9900;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .product-details {
+            font-size: 13px;
+            color: #a0a0a0;
+            margin-bottom: 15px;
+            line-height: 1.8;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .detail-label {
+            color: #888;
+        }
+
+        .detail-value {
+            color: #00d4ff;
+            font-weight: bold;
+        }
+
+        .product-price {
+            font-size: 28px;
+            font-weight: bold;
+            color: #00ff00;
+            margin-bottom: 15px;
+        }
+
+        .add-to-cart-btn {
+            width: 100%;
+            background-color: #00d4ff;
+            color: #0a0e27;
+            border: none;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-to-cart-btn:hover {
+            background-color: #00ffff;
+            transform: scale(1.02);
+        }
+
+        /* Cart Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .modal-content {
+            background-color: #1a2a52;
+            margin: auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid #00d4ff;
+        }
+
+        .close-btn {
+            color: #00d4ff;
+            float: left;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: #00ffff;
+        }
+
+        .modal h2 {
+            color: #00d4ff;
+            margin-bottom: 20px;
+            margin-top: 10px;
+        }
+
+        .cart-items {
+            margin-bottom: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .cart-item {
+            background-color: #0f1a35;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border-right: 3px solid #00d4ff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-item-info h3 {
+            color: #00d4ff;
+            margin-bottom: 5px;
+        }
+
+        .cart-item-price {
+            color: #00ff00;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .remove-item-btn {
+            background-color: #ff4444;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.3s ease;
+        }
+
+        .remove-item-btn:hover {
+            background-color: #cc0000;
+        }
+
+        .cart-summary {
+            border-top: 2px solid #00d4ff;
+            padding-top: 15px;
+            margin-bottom: 20px;
+        }
+
+        .summary-line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .summary-line.total {
+            font-size: 20px;
+            font-weight: bold;
+            color: #00ff00;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            background-color: #00ff00;
+            color: #0a0e27;
+            border: none;
+            padding: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkout-btn:hover {
+            background-color: #00dd00;
+            transform: scale(1.02);
+        }
+
+        .checkout-btn:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+            transform: scale(1);
+        }
+
+        .empty-cart {
+            text-align: center;
+            color: #a0a0a0;
+            padding: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 20px;
+            }
+
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .header-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .cart-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <div class="logo">Steam Accounts</div>
+            <button class="cart-btn" onclick="openCart()">
+                🛒 سلة التسوق
+                <span class="cart-count" id="cartCount">0</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <section class="hero">
+            <h1>متجر حسابات ستيم</h1>
+            <p>أحصل على أفضل حسابات ستيم بأسعار منخفضة</p>
+        </section>
+
+        <section class="products-grid" id="productsGrid">
+            <!-- Products will be inserted here by JavaScript -->
+        </section>
+    </main>
+
+    <!-- Cart Modal -->
+    <div id="cartModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeCart()">&times;</span>
+            <h2>🛒 سلة التسوق</h2>
+            <div class="cart-items" id="cartItems">
+                <div class="empty-cart">السلة فارغة</div>
+            </div>
+            <div class="cart-summary" style="display: none;" id="cartSummary">
+                <div class="summary-line">
+                    <span>المجموع الفرعي:</span>
+                    <span id="subtotal">0 ر.س</span>
+                </div>
+                <div class="summary-line">
+                    <span>الرسوم:</span>
+                    <span id="fees">0 ر.س</span>
+                </div>
+                <div class="summary-line total">
+                    <span>الإجمالي:</span>
+                    <span id="total">0 ر.س</span>
+                </div>
+            </div>
+            <button class="checkout-btn" id="checkoutBtn" disabled onclick="checkout()">الدفع الآن</button>
+        </div>
+    </div>
+
+    <script>
+        // Products Data
+        const products = [
+            {
+                id: 1,
+                name: "حساب بدايتي",
+                level: "المستوى 1",
+                games: 12,
+                playtime: "50 ساعة",
+                skin: "بدون جلود",
+                price: 49.99
+            },
+            {
+                id: 2,
+                name: "حساب متقدم",
+                level: "المستوى 15",
+                games: 45,
+                playtime: "200 ساعة",
+                skin: "جلود نادرة",
+                price: 99.99
+            },
+            {
+                id: 3,
+                name: "حساب احترافي",
+                level: "المستوى 30",
+                games: 120,
+                playtime: "1000 ساعة",
+                skin: "جلود نادرة جداً",
+                price: 199.99
+            },
+            {
+                id: 4,
+                name: "حساب نخبة",
+                level: "المستوى 50",
+                games: 200,
+                playtime: "2000 ساعة",
+                skin: "جلود أسطورية",
+                price: 349.99
+            },
+            {
+                id: 5,
+                name: "حساب قيمي",
+                level: "المستوى 25",
+                games: 80,
+                playtime: "800 ساعة",
+                skin: "جلود نادرة",
+                price: 149.99
+            },
+            {
+                id: 6,
+                name: "حساب ماسي",
+                level: "المستوى 40",
+                games: 150,
+                playtime: "1500 ساعة",
+                skin: "جلود أسطورية",
+                price: 249.99
+            }
+        ];
+
+        let cart = [];
+
+        // Render Products
+        function renderProducts() {
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = products.map(product => `
+                <div class="product-card">
+                    <div class="product-image">🎮</div>
+                    <div class="product-content">
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-level">${product.level}</div>
+                        <div class="product-details">
+                            <div class="detail-item">
+                                <span class="detail-label">عدد الألعاب:</span>
+                                <span class="detail-value">${product.games}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">ساعات اللعب:</span>
+                                <span class="detail-value">${product.playtime}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">الجلود:</span>
+                                <span class="detail-value">${product.skin}</span>
+                            </div>
+                        </div>
+                        <div class="product-price">${product.price} ر.س</div>
+                        <button class="add-to-cart-btn" onclick="addToCart(${product.id})">
+                            أضف للسلة
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Add to Cart
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            const existingItem = cart.find(item => item.id === productId);
+
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+
+            updateCart();
+            showNotification(`${product.name} تم إضافته للسلة`);
+        }
+
+        // Update Cart Display
+        function updateCart() {
+            document.getElementById('cartCount').textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+            renderCartItems();
+        }
+
+        // Render Cart Items
+        function renderCartItems() {
+            const cartItems = document.getElementById('cartItems');
+            const cartSummary = document.getElementById('cartSummary');
+
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<div class="empty-cart">السلة فارغة</div>';
+                cartSummary.style.display = 'none';
+                document.getElementById('checkoutBtn').disabled = true;
+                return;
+            }
+
+            cartSummary.style.display = 'block';
+            document.getElementById('checkoutBtn').disabled = false;
+
+            cartItems.innerHTML = cart.map(item => `
+                <div class="cart-item">
+                    <div class="cart-item-info">
+                        <h3>${item.name}</h3>
+                        <div>الكمية: ${item.quantity}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="cart-item-price">${(item.price * item.quantity).toFixed(2)} ر.س</div>
+                        <button class="remove-item-btn" onclick="removeFromCart(${item.id})">حذف</button>
+                    </div>
+                </div>
+            `).join('');
+
+            updateCartSummary();
+        }
+
+        // Update Cart Summary
+        function updateCartSummary() {
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const fees = subtotal * 0.05; // 5% fees
+            const total = subtotal + fees;
+
+            document.getElementById('subtotal').textContent = subtotal.toFixed(2) + ' ر.س';
+            document.getElementById('fees').textContent = fees.toFixed(2) + ' ر.س';
+            document.getElementById('total').textContent = total.toFixed(2) + ' ر.س';
+        }
+
+        // Remove from Cart
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            updateCart();
+            showNotification('تم حذف المنتج من السلة');
+        }
+
+        // Open Cart Modal
+        function openCart() {
+            document.getElementById('cartModal').style.display = 'block';
+        }
+
+        // Close Cart Modal
+        function closeCart() {
+            document.getElementById('cartModal').style.display = 'none';
+        }
+
+        // Checkout
+        function checkout() {
+            if (cart.length === 0) return;
+
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0) * 1.05;
+            alert(`شكراً لك! إجمالي طلبك: ${total.toFixed(2)} ر.س\n\nسيتم إرسال تفاصيل الحسابات عبر البريد الإلكتروني.`);
+            cart = [];
+            updateCart();
+            closeCart();
+        }
+
+        // Show Notification
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                background-color: #00d4ff;
+                color: #0a0e27;
+                padding: 15px 25px;
+                border-radius: 5px;
+                font-weight: bold;
+                z-index: 2000;
+                animation: slideIn 0.3s ease;
+            `;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 2000);
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('cartModal');
+            if (event.target === modal) {
+                closeCart();
+            }
+        }
+
+        // Initialize
+        renderProducts();
+    </script>
+</body>
+</html>
